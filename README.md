@@ -27,31 +27,16 @@
 ## Installation
 
 ```bash
-pip install sqlite-panel
+pip install sqlite_webpanel
 ```
 
 ## Quick start
 
 ```python
-from fastapi import FastAPI
-from sqlite_webpanel import mount_sqlite_panel
 
-app = FastAPI()
-
-mount_sqlite_panel(app, db_path="app.db")
-# → Visit http://localhost:8000/admin
-```
-
-### Options
-
-```python
-mount_sqlite_panel(
-    app,
-    db_path="app.db",   # Path to SQLite file (created if absent)
-    prefix="/admin",    # URL prefix  (default: /admin)
-    read_only=False,    # Disable all writes (default: False)
-    title="My App DB",  # Panel title (default: SQLite Panel)
-)
+from sqlite_webpanel import run_panel
+run_panel(app, db_path="app.db")
+# → Visit http://localhost:8888/admin
 ```
 
 ---
@@ -59,9 +44,8 @@ mount_sqlite_panel(
 ## Usage example
 
 ```python
-# main.py
-from fastapi import FastAPI
-from sqlite_webpanel import mount_sqlite_panel
+# dbview.py
+from sqlite_webpanel import run_panel
 import sqlite3
 
 app = FastAPI()
@@ -73,7 +57,7 @@ conn.execute("INSERT OR IGNORE INTO users VALUES (1,'Alice','alice@example.com')
 conn.commit()
 conn.close()
 
-mount_sqlite_panel(app, db_path="demo.db", title="Demo DB")
+run_panel(db_path="demo.db", title="Demo DB")
 
 # uvicorn main:app --reload
 ```
@@ -83,8 +67,8 @@ mount_sqlite_panel(app, db_path="demo.db", title="Demo DB")
 ## Development
 
 ```bash
-git clone https://github.com/yourname/sqlite-panel
-cd sqlite-panel
+git clone https://github.com/yourname/sqlite_webpanel
+cd sqlite_webpanel
 pip install -e ".[dev]"
 pytest
 ```
