@@ -19,7 +19,7 @@ testpaths = ["tests"]
 
 [project]
 name = "sqlite_webpanel"
-version = "0.1.0"
+version = "0.1.2"
 description = "A plug-and-play SQLite admin panel for FastAPI — beautiful, fast, and intelligent by default."
 readme = "README.md"
 license = "MIT"
@@ -55,6 +55,6 @@ dev = [
 
 [project.urls]
 Homepage = "https://github.com/purvaspatel"
-Documentation = "https://github.com/purvaspatel/sqlite-webpanel#readme"
+Documentation = "https://github.com/purvaspatel/sqlite_webpanel#readme"
 Repository = "https://github.com/purvaspatel/sqlit_webpanel"
 
