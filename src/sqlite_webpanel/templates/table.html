@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block page_title %}{{ table_info.name }} — {{ title }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-left">
+    <h1 class="page-title">{{ table_info.name }}</h1>
+    <span class="row-count-badge">{{ result.total }} row{% if result.total != 1 %}s{% endif %}</span>
+  </div>
+  <div class="page-header-right">
+    {% if not read_only %}
+    <button class="btn btn-primary" onclick="openInsertModal()">
+      <span>+</span> New Row
+    </button>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Search + Filter bar -->
+<div class="toolbar" id="toolbar">
+  <form method="GET" id="search-form" class="search-form">
+    <div class="search-wrapper">
+      <span class="search-icon">⌕</span>
+      <input
+        type="search"
+        name="search"
+        value="{{ result.search }}"
+        placeholder="Search all columns…"
+        class="search-input"
+        autocomplete="off"
+        hx-get="{{ prefix }}/table/{{ table_info.name }}/rows"
+        hx-trigger="keyup changed delay:300ms, search"
+        hx-target="#table-body-container"
+        hx-include="#search-form"
+        hx-push-url="false"
+      />
+    </div>
+    <input type="hidden" name="page_size" value="{{ result.page_size }}" />
+    <input type="hidden" name="sort" value="{{ result.sort_col or '' }}" />
+    <input type="hidden" name="dir" value="{{ result.sort_dir }}" />
+    {% for col, val in filters.items() %}
+    <input type="hidden" name="filter_{{ col }}" value="{{ val }}" />
+    {% endfor %}
+
+    {% if result.search or filters %}
+    <a href="{{ prefix }}/table/{{ table_info.name }}" class="btn btn-ghost btn-sm">Clear</a>
+    {% endif %}
+  </form>
+
+  <div class="toolbar-right">
+    <div class="page-size-select">
+      <label class="sr-only" for="page-size">Rows per page</label>
+      <select id="page-size" onchange="changePageSize(this.value)" class="select-sm">
+        {% for n in [25, 50, 100, 250] %}
+        <option value="{{ n }}" {% if n == result.page_size %}selected{% endif %}>{{ n }} / page</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- Active filter pills -->
+{% if filters %}
+<div class="filter-pills">
+  {% for col, val in filters.items() %}
+  <span class="filter-pill">
+    <span class="filter-pill-col">{{ col }}</span>
+    <span class="filter-pill-val">{{ val }}</span>
+    <a href="?{% for c2, v2 in filters.items() %}{% if c2 != col %}filter_{{ c2 }}={{ v2 }}&{% endif %}{% endfor %}search={{ result.search }}&sort={{ result.sort_col or '' }}&dir={{ result.sort_dir }}" class="filter-pill-remove">×</a>
+  </span>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Table container -->
+<div class="table-container" id="table-body-container"
+     data-table="{{ table_info.name }}"
+     data-prefix="{{ prefix }}"
+     data-fingerprint-url="{{ prefix }}/api/fingerprint">
+  {% include "partials/rows.html" %}
+</div>
+
+<!-- Insert Modal -->
+{% if not read_only %}
+<div class="modal-backdrop" id="insert-modal" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">New Row — {{ table_info.name }}</h2>
+      <button class="modal-close" onclick="closeInsertModal()">×</button>
+    </div>
+    <form id="insert-form" class="modal-body">
+      {% for col in table_info.columns %}
+      {% if not col.is_pk %}
+      <div class="form-group">
+        <label class="form-label">
+          {{ col.name }}
+          <span class="form-type">{{ col.display_type }}</span>
+          {% if col.notnull %}<span class="form-required">*</span>{% endif %}
+        </label>
+        <input
+          type="{% if col.display_type in ['INTEGER','REAL'] %}number{% else %}text{% endif %}"
+          name="{{ col.name }}"
+          class="form-input"
+          {% if col.notnull %}required{% endif %}
+          placeholder="{{ col.default_value or '' }}"
+        />
+      </div>
+      {% endif %}
+      {% endfor %}
+    </form>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeInsertModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitInsert('{{ table_info.name }}')">Insert Row</button>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<script>
+  // Pass current params to JS for sorting/pagination
+  window.PANEL_STATE = {
+    table: "{{ table_info.name }}",
+    prefix: "{{ prefix }}",
+    page: {{ result.page }},
+    pageSize: {{ result.page_size }},
+    sort: "{{ result.sort_col or '' }}",
+    dir: "{{ result.sort_dir }}",
+    search: {{ result.search | tojson }},
+    filters: {{ filters | tojson }},
+    totalPages: {{ result.total_pages }},
+  };
+</script>
+{% endblock %}

@@ -1,0 +1,120 @@
+<!-- Table + Pagination — rendered standalone for HTMX swaps -->
+<div class="table-scroll">
+  <table class="data-table">
+    <thead>
+      <tr>
+        {% for col_name in result.columns %}
+        {% set is_sorted = result.sort_col == col_name %}
+        {% set next_dir = 'desc' if (is_sorted and result.sort_dir == 'asc') else 'asc' %}
+        <th class="th {% if is_sorted %}th-sorted{% endif %}">
+          <div class="th-inner">
+            <a href="{{ prefix }}/table/{{ result.table }}?sort={{ col_name }}&dir={{ next_dir }}&search={{ result.search }}&page_size={{ result.page_size }}{% for c, v in result.filters.items() %}&filter_{{ c }}={{ v }}{% endfor %}"
+               class="th-sort-link">
+              {{ col_name }}
+              {% if is_sorted %}
+                <span class="sort-arrow">{% if result.sort_dir == 'asc' %}↑{% else %}↓{% endif %}</span>
+              {% else %}
+                <span class="sort-arrow sort-arrow-idle">↕</span>
+              {% endif %}
+            </a>
+            <button class="th-filter-btn" title="Filter by {{ col_name }}"
+                    onclick="openColumnFilter('{{ col_name }}')">⊞</button>
+          </div>
+        </th>
+        {% endfor %}
+        {% if not read_only %}
+        <th class="th th-actions">Actions</th>
+        {% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% if result.rows %}
+        {% for row in result.rows %}
+        <tr class="data-row" data-row-id="{{ loop.index }}">
+          {% for i, val in enumerate(row) %}
+          {% set col_name = result.columns[i] %}
+          {% set col_info = col_map.get(col_name) %}
+          <td class="td"
+              data-col="{{ col_name }}"
+              {% if not read_only and col_info and not col_info.is_pk %}
+              ondblclick="startInlineEdit(this, '{{ result.table }}', '{{ pk_col }}', '{{ row[result.columns.index(pk_col)] if pk_col else '' }}', '{{ col_name }}')"
+              title="Double-click to edit"
+              {% endif %}
+          >
+            {{ render_cell(val, col_info.display_type if col_info else 'TEXT') | safe }}
+          </td>
+          {% endfor %}
+          {% if not read_only %}
+          <td class="td td-actions">
+            <div class="action-btns">
+              <a href="{{ prefix }}/table/{{ result.table }}/row/{{ row[result.columns.index(pk_col)] if pk_col else loop.index }}"
+                 class="btn-icon" title="View row">👁</a>
+              <button class="btn-icon btn-icon-danger"
+                      onclick="deleteRow('{{ result.table }}', '{{ row[result.columns.index(pk_col)] if pk_col else '' }}')"
+                      title="Delete row">✕</button>
+            </div>
+          </td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+      {% else %}
+        <tr>
+          <td colspan="{{ result.columns | length + (1 if not read_only else 0) }}" class="td-empty">
+            <div class="empty-state">
+              <span class="empty-icon">◌</span>
+              <span>No rows found{% if result.search %} for "{{ result.search }}"{% endif %}</span>
+            </div>
+          </td>
+        </tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Pagination -->
+{% if result.total_pages > 1 %}
+<div class="pagination">
+  <span class="pagination-info">
+    {{ (result.page - 1) * result.page_size + 1 }}–{{ [result.page * result.page_size, result.total] | min }} of {{ result.total }}
+  </span>
+  <div class="pagination-pages">
+    {% if result.has_prev %}
+    <a href="{{ prefix }}/table/{{ result.table }}?page={{ result.page - 1 }}&sort={{ result.sort_col or '' }}&dir={{ result.sort_dir }}&search={{ result.search }}&page_size={{ result.page_size }}{% for c, v in result.filters.items() %}&filter_{{ c }}={{ v }}{% endfor %}"
+       class="page-btn">‹</a>
+    {% endif %}
+
+    {% for p in result.page_range %}
+      {% if p == -1 %}
+        <span class="page-ellipsis">…</span>
+      {% elif p == result.page %}
+        <span class="page-btn page-btn-active">{{ p }}</span>
+      {% else %}
+        <a href="{{ prefix }}/table/{{ result.table }}?page={{ p }}&sort={{ result.sort_col or '' }}&dir={{ result.sort_dir }}&search={{ result.search }}&page_size={{ result.page_size }}{% for c, v in result.filters.items() %}&filter_{{ c }}={{ v }}{% endfor %}"
+           class="page-btn">{{ p }}</a>
+      {% endif %}
+    {% endfor %}
+
+    {% if result.has_next %}
+    <a href="{{ prefix }}/table/{{ result.table }}?page={{ result.page + 1 }}&sort={{ result.sort_col or '' }}&dir={{ result.sort_dir }}&search={{ result.search }}&page_size={{ result.page_size }}{% for c, v in result.filters.items() %}&filter_{{ c }}={{ v }}{% endfor %}"
+       class="page-btn">›</a>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Column filter modal -->
+<div class="modal-backdrop" id="col-filter-modal" style="display:none">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h2 class="modal-title">Filter column</h2>
+      <button class="modal-close" onclick="closeColFilter()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="text" id="col-filter-input" class="form-input" placeholder="Contains…" autocomplete="off" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeColFilter()">Cancel</button>
+      <button class="btn btn-primary" onclick="applyColFilter()">Apply Filter</button>
+    </div>
+  </div>
+</div>

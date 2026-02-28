@@ -1,0 +1,60 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.package-data]
+sqlite_webpanel = [
+    "static/*",
+    "templates/*",
+    "templates/partials/*",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["sqlite_webpanel*"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[project]
+name = "sqlite_webpanel"
+version = "0.1.0"
+description = "A plug-and-play SQLite admin panel for FastAPI — beautiful, fast, and intelligent by default."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Purva Sanjay Patel" }]
+keywords = ["sqlite", "fastapi", "admin", "panel", "database"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: FastAPI",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Database",
+    "Topic :: Internet :: WWW/HTTP",
+]
+requires-python = ">=3.9"
+dependencies = [
+    "fastapi>=0.100.0",
+    "jinja2>=3.1.0",
+    "python-multipart>=0.0.6",
+    "uvicorn>=0.22.0",
+]
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-asyncio>=0.21",
+    "httpx>=0.24",
+    "uvicorn>=0.22",
+]
+
+[project.urls]
+Homepage = "https://github.com/purvaspatel"
+Documentation = "https://github.com/purvaspatel/sqlite-webpanel#readme"
+Repository = "https://github.com/purvaspatel/sqlit_webpanel"
+

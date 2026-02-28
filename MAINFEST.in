@@ -1,0 +1,2 @@
+recursive-include src/sqlite_webpanel/static *
+recursive-include src/sqlite_webpanel/templates *

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block page_title %}Row {{ row[pk_col] if pk_col else '' }} — {{ table_info.name }} — {{ title }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-left">
+    <a href="{{ prefix }}/table/{{ table_info.name }}" class="back-link">← {{ table_info.name }}</a>
+    <h1 class="page-title">
+      Row
+      {% if pk_col %}<code class="page-title-code">{{ row[pk_col] }}</code>{% endif %}
+    </h1>
+  </div>
+  {% if not read_only %}
+  <div class="page-header-right">
+    <button class="btn btn-ghost btn-sm" onclick="toggleEditMode()">Edit Row</button>
+    <button class="btn btn-danger btn-sm"
+            onclick="deleteRow('{{ table_info.name }}', '{{ row[pk_col] if pk_col else '' }}', true)">Delete</button>
+  </div>
+  {% endif %}
+</div>
+
+<div class="detail-card">
+  <form id="edit-form">
+    <table class="detail-table">
+      <tbody>
+        {% for col in table_info.columns %}
+        <tr class="detail-row">
+          <td class="detail-label">
+            <span class="detail-col-name">{{ col.name }}</span>
+            <span class="detail-col-type">{{ col.display_type }}</span>
+            {% if col.is_pk %}<span class="badge-pk">PK</span>{% endif %}
+          </td>
+          <td class="detail-value">
+            <div class="detail-value-view" id="view-{{ col.name }}">
+              {{ render_cell(row[col.name], col.display_type) | safe }}
+            </div>
+            {% if not read_only and not col.is_pk %}
+            <div class="detail-value-edit" id="edit-{{ col.name }}" style="display:none">
+              <textarea name="{{ col.name }}" class="form-input form-textarea" rows="3">{{ row[col.name] if row[col.name] is not none else '' }}</textarea>
+            </div>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% if not read_only %}
+    <div class="detail-edit-actions" id="edit-actions" style="display:none">
+      <button type="button" class="btn btn-ghost" onclick="cancelEdit()">Cancel</button>
+      <button type="button" class="btn btn-primary"
+              onclick="saveRow('{{ table_info.name }}', '{{ row[pk_col] if pk_col else '' }}')">Save Changes</button>
+    </div>
+    {% endif %}
+  </form>
+</div>
+{% endblock %}
