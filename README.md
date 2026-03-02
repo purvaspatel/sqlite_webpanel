@@ -43,29 +43,6 @@ run_panel(app, db_path="app.db")
 
 ---
 
-## Usage example
-
-```python
-# dbview.py
-from sqlite_webpanel import run_panel
-import sqlite3
-
-app = FastAPI()
-
-# Create some demo data
-conn = sqlite3.connect("demo.db")
-conn.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT, email TEXT)")
-conn.execute("INSERT OR IGNORE INTO users VALUES (1,'Alice','alice@example.com')")
-conn.commit()
-conn.close()
-
-run_panel(db_path="demo.db", title="Demo DB")
-
-# uvicorn main:app --reload
-```
-
----
-
 ## Development
 
 ```bash
