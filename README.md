@@ -1,11 +1,13 @@
-# sqlite-panel
+# sqlite-panel  
+> A plug-and-play SQLite admin panel for FastAPI — beautiful, fast, and intelligent by default.  
 
-> A plug-and-play SQLite admin panel for FastAPI — beautiful, fast, and intelligent by default.
+<p align="center">
+  <img src="https://github.com/purvaspatel/sqlite_webpanel/blob/main/assets/preview.gif" alt="Preview" />
+</p>
 
-![Python](https://img.shields.io/badge/python-3.9+-blue)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green)
+![Python](https://img.shields.io/badge/python-3.9+-blue) 
+![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green) 
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
-
 ---
 
 ## Features
